@@ -1,6 +1,10 @@
-int redDistance = 0;
-int greenDistance = 0;
-int blueDistance = 0;
+#define RED 0
+#define GREEN 2
+#define BLUE 5
+
+float redDistance, greenDistance, blueDistance = 0;
+float oRedDistance, oGreenDistance, oBlueDistance = 0;
+
 
 
 void setup(){
@@ -16,32 +20,49 @@ void setup(){
     setBlueRGB(0, 0, 100);
     
     setOutputRGB(255,255,255);
-
 }
 
 void loop(){
   
-  redDistance = analogRead(0);
-  greenDistance = analogRead(2);
-  blueDistance = analogRead(5);
+  redDistance = float(0.1f * float(readValue(RED))) + float(0.9f * float(oRedDistance));
+  greenDistance = float(0.1f * float(readValue(GREEN))) + float(0.9f * float(oGreenDistance));
+  blueDistance = float(0.1f * float(readValue(BLUE))) + float(0.9f * float(oBlueDistance));
   
-  setOutputRGB( map(redDistance, 0, 600, 0, 255),
-                map(greenDistance, 0, 600, 0, 255),
-                map(blueDistance, 0, 600, 0, 255)
-              );
+  setOutputRGB( redDistance, greenDistance, blueDistance );
               
   
   Serial.print(redDistance);
   Serial.print(" - ");
   Serial.print(greenDistance);
   Serial.print(" - ");
-  Serial.print(blueDistance);
-  Serial.println(" - ");
-  
-  //setBlueRGB(0,0,map(greenDistance, 0, 600, 0, 255));
+  Serial.println(blueDistance);
 }
 
-void setRedRGB(int r, int g, int b){
+
+
+int readValue(int cVal)
+{
+  int temp = 0;
+  
+  if (cVal == RED){
+    oRedDistance = redDistance;
+    temp = map( analogRead(cVal) , 230 , 480 , 0 , 255);
+  } else if (cVal == GREEN){
+    oGreenDistance = greenDistance;
+    temp = map( analogRead(cVal) , 220 , 520 , 0 , 255);
+  } else if (cVal == BLUE){
+    oBlueDistance = blueDistance;
+    temp = map( analogRead(cVal) , 200 , 460 , 0 , 255);
+  }
+  
+  (temp > 255) ? (temp = 255) : (temp = temp);
+  (temp < 0) ? (temp = 0) : (temp = temp);
+  
+  return temp;
+}
+
+void setRedRGB(int r, int g, int b)
+{
   //led is rgb but only red is hooked up to pwm.
   analogWrite(3, r);
   
